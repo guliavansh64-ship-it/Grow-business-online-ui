@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Platform Admin — GrowBusiness Online (Super Admin Demo v2)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#4f46e5; --primary-2:#7c3aed;
+  --primary-soft:#eef0ff; --secondary:#0ea5e9; --accent:#f59e0b;
+  --background:#f5f6fb; --surface:#ffffff; --surface-2:#f1f3fa;
+  --text:#141a2e; --muted:#5f6983; --border:#e4e7f2;
+  --success:#16a34a; --warning:#f59e0b; --danger:#e11d48;
+  --navy:#0d1226; --navy-2:#161d3d; --navy-3:#1d2547;
+  --radius:16px;
+  --shadow:0 10px 30px rgba(20,26,46,.07);
+  --shadow-lg:0 26px 60px rgba(20,26,46,.15);
+  --font-display:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;
+  --font-body:'Inter',ui-sans-serif,system-ui,sans-serif;
+  --side-w:264px;
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+[data-theme="dark"]{
+  --background:#0b0f1f; --surface:#131a33; --surface-2:#1a2142;
+  --text:#edf0fb; --muted:#9aa4c4; --border:#262f56;
+  --primary-soft:#222a55;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+  --shadow-lg:0 26px 60px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-body);background:var(--background);color:var(--text);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--font-display);letter-spacing:-.02em;line-height:1.2}
+a{color:inherit}
+button{font-family:var(--font-body)}
+:focus-visible{outline:3px solid var(--primary);outline-offset:2px;border-radius:8px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.demo-bar{background:var(--navy);color:#c7cfef;font-size:12px;padding:8px 14px;display:flex;gap:9px;align-items:center;justify-content:center;text-align:center;font-weight:500}
+.demo-bar b{color:#fff}
+.demo-bar .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(245,158,11,.18);animation:pulse 2s infinite;flex:none}
+.demo-bar a{color:#a5b4fc;text-decoration:none;font-weight:600}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+.demo-nav{position:fixed;left:14px;bottom:14px;z-index:380;background:rgba(13,18,38,.94);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:9px 7px;display:flex;flex-direction:column;gap:3px;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.demo-nav .dn-l{font-size:8.5px;letter-spacing:.18em;color:#7f8bc0;font-weight:700;text-align:center;padding:3px 0 4px}
+.demo-nav a{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:600;color:#aab3dd;text-decoration:none;padding:7px 12px;border-radius:10px;transition:.18s;white-space:nowrap}
+.demo-nav a:hover{color:#fff;background:rgba(255,255,255,.09);transform:translateX(2px)}
+.demo-nav a.act{color:#fff;background:linear-gradient(135deg,#4f46e5,#7c3aed);box-shadow:0 6px 14px rgba(79,70,229,.4)}
+.demo-nav a i{width:6px;height:6px;border-radius:2px;background:currentColor;opacity:.7;flex:none}
+@media(max-width:640px){.demo-nav{padding:7px 5px}.demo-nav a{font-size:10.5px;padding:6px 9px}.demo-nav .dn-l{display:none}}
+
+.app{display:grid;grid-template-columns:var(--side-w) 1fr;min-height:calc(100vh - 34px)}
+
+/* sidebar */
+.side{background:var(--navy);color:#aab3dd;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;z-index:100}
+.side::-webkit-scrollbar{width:6px}.side::-webkit-scrollbar-thumb{background:#2a335e;border-radius:99px}
+.side-brand{display:flex;align-items:center;gap:11px;padding:20px 18px 14px;color:#fff}
+.side-logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#0ea5e9);display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-display);font-weight:700;font-size:15px;flex:none}
+.side-brand b{font-size:14.5px;display:block;line-height:1.25;font-family:var(--font-display)}
+.side-brand small{font-size:10.5px;color:#7f8bc0;display:flex;align-items:center;gap:6px}
+.env{font-size:9px;font-weight:800;letter-spacing:.08em;background:rgba(245,158,11,.2);color:#fbbf24;padding:2px 7px;border-radius:99px;border:1px solid rgba(245,158,11,.4)}
+.side-nav{padding:6px 12px;flex:1}
+.nav-grp{font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#5c6799;padding:15px 10px 6px}
+.nav-it{display:flex;align-items:center;gap:11px;padding:9.5px 12px;border-radius:11px;font-size:13.5px;font-weight:500;color:#aab3dd;cursor:pointer;transition:.18s;border:none;background:none;width:100%;text-align:left}
+.nav-it svg{width:18px;height:18px;flex:none}
+.nav-it:hover{background:var(--navy-3);color:#fff}
+.nav-it.act{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;box-shadow:0 8px 18px rgba(79,70,229,.35)}
+.nav-it .nb{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px}
+.side-foot{padding:14px;border-top:1px solid rgba(255,255,255,.08)}
+.side-foot .nav-it.danger{color:#fda4af}
+.side-foot .nav-it.danger:hover{background:rgba(225,29,72,.15);color:#fecdd3}
+
+/* topbar */
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:90;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:12px 26px}
+.tb-title{font-family:var(--font-display);font-weight:700;font-size:16.5px;margin-right:auto}
+.tb-title small{display:block;font-family:var(--font-body);font-weight:400;font-size:11.5px;color:var(--muted)}
+.tb-search{position:relative}
+.tb-search input{border:1px solid var(--border);background:var(--surface-2);border-radius:999px;padding:9px 16px 9px 38px;font-size:13.5px;width:210px;outline:none;transition:.25s;font-family:var(--font-body);color:var(--text)}
+.tb-search input:focus{width:270px;border-color:var(--primary);background:var(--surface);box-shadow:0 0 0 4px var(--primary-soft)}
+.tb-search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted)}
+.icon-btn{position:relative;width:42px;height:42px;border-radius:12px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;color:var(--text)}
+.icon-btn:hover{border-color:var(--primary);color:var(--primary)}
+.icon-btn svg{width:19px;height:19px}
+.badge{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;border-radius:999px;background:var(--danger);color:#fff;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px}
+.hamb{display:none}
+.profile{display:flex;align-items:center;gap:10px;cursor:pointer;padding:6px 12px 6px 6px;border:1px solid var(--border);border-radius:999px;background:var(--surface);transition:.2s}
+.profile:hover{border-color:var(--primary)}
+.avt{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#0ea5e9);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:none}
+.profile b{font-size:12.5px;display:block;line-height:1.2}
+.profile small{font-size:10.5px;color:var(--muted)}
+
+/* dropdown */
+.drop{position:relative}
+.drop-menu{position:absolute;top:calc(100% + 10px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg);min-width:270px;opacity:0;transform:translateY(-8px);pointer-events:none;transition:.22s;z-index:120;overflow:hidden}
+.drop-menu.open{opacity:1;transform:none;pointer-events:auto}
+.dh2{padding:13px 16px;border-bottom:1px solid var(--border);font-size:13.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.dh2 button{border:none;background:none;color:var(--primary);font-size:12px;font-weight:600;cursor:pointer}
+.nd{display:flex;gap:11px;padding:12px 16px;border-bottom:1px solid var(--border);font-size:12.5px;align-items:flex-start}
+.nd:last-child{border:none}
+.nd .nic{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:none}
+.nd .nic svg{width:15px;height:15px}
+.nd small{display:block;color:var(--muted);font-size:11px}
+.nd.unread{background:var(--primary-soft)}
+
+/* content */
+.content{padding:26px;flex:1}
+.page{display:none;animation:pgIn .35s ease}
+.page.act{display:block}
+@keyframes pgIn{from{opacity:0;transform:translateY(10px)}}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+.page-head h1{font-size:24px}
+.page-head p{color:var(--muted);font-size:13.5px}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:15px;padding:16px;transition:.25s;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.kpi .ki{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:11px}
+.kpi .ki svg{width:18px;height:18px}
+.kpi small{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.kpi b{display:block;font-family:var(--font-display);font-size:21px;margin-top:2px}
+.kpi .delta{font-size:11px;font-weight:700;margin-top:4px;display:inline-block}
+.up{color:var(--success)}.dn{color:var(--danger)}.nm{color:var(--muted)}
+.kpi .spark{position:absolute;right:12px;top:18px;width:52px;height:22px;opacity:.4}
+.kpi.warn{border-color:rgba(245,158,11,.45);background:linear-gradient(180deg,rgba(245,158,11,.07),var(--surface))}
+
+.grid-2{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:16px}
+.grid-2e{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+.panel-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;flex-wrap:wrap}
+.panel-h h3{font-size:15.5px}
+.link{font-size:12.5px;font-weight:600;color:var(--primary);cursor:pointer;background:none;border:none}
+.link:hover{text-decoration:underline}
+.chip{font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:999px;border:1px solid var(--border);background:var(--surface-2);color:var(--muted);cursor:pointer;transition:.15s;font-family:var(--font-body)}
+.chip.act,.chip:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-soft)}
+
+.chart-svg{width:100%;height:auto}
+.bar{transform:scaleY(0);transform-origin:bottom;transition:transform .8s cubic-bezier(.2,.8,.3,1)}
+.page.act .bar{transform:scaleY(1)}
+.draw-line{stroke-dasharray:1200;stroke-dashoffset:1200}
+.page.act .draw-line{animation:lineDraw 1.7s .2s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes lineDraw{to{stroke-dashoffset:0}}
+
+/* pills / tables */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.pill::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.p-green{color:var(--success);background:rgba(22,163,74,.1)}
+.p-amber{color:#b45309;background:rgba(245,158,11,.14)}
+.p-red{color:var(--danger);background:rgba(225,29,72,.1)}
+.p-blue{color:var(--primary);background:var(--primary-soft)}
+.p-gray{color:var(--muted);background:var(--surface-2)}
+.p-violet{color:var(--primary-2);background:rgba(124,58,237,.1)}
+.twrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow)}
+table.tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
+.tbl th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:12px 15px;border-bottom:1px solid var(--border);background:var(--surface-2);white-space:nowrap}
+.tbl td{padding:12px 15px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr{transition:.15s}
+.tbl tbody tr:hover{background:var(--surface-2)}
+.tbl .nm2{display:flex;align-items:center;gap:10px;font-weight:600}
+.mini-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex:none}
+.mono{font-family:ui-monospace,'SF Mono',monospace;font-size:12px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;border-radius:999px;padding:10px 18px;border:1px solid transparent;cursor:pointer;transition:.2s;font-size:13px;text-decoration:none;line-height:1.2}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;box-shadow:0 8px 20px rgba(79,70,229,.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 13px 26px rgba(79,70,229,.4)}
+.btn-ghost{background:var(--surface);color:var(--text);border-color:var(--border)}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+.btn-ok{background:var(--surface);color:var(--success);border-color:rgba(22,163,74,.4)}
+.btn-ok:hover{background:rgba(22,163,74,.08)}
+.btn-no{background:var(--surface);color:var(--danger);border-color:rgba(225,29,72,.35)}
+.btn-no:hover{background:rgba(225,29,72,.08)}
+.btn-sm{padding:7px 12px;font-size:12px}
+.btn.full{width:100%}
+.btn svg{width:15px;height:15px}
+
+/* notes */
+.note{display:flex;gap:10px;align-items:center;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);color:#92610a;padding:12px 16px;border-radius:13px;font-size:13px;font-weight:500;margin-bottom:18px}
+[data-theme="dark"] .note{color:#fcd34d}
+.note svg{width:17px;height:17px;flex:none}
+
+/* countdown */
+.cd{display:inline-flex;align-items:center;gap:7px;font-family:ui-monospace,monospace;font-size:12px;font-weight:700;background:var(--navy);color:#a5f3fc;padding:5px 12px;border-radius:9px;letter-spacing:.03px}
+.cd::before{content:'';width:7px;height:7px;border-radius:50%;background:#22d3ee;animation:pulse 1.6s infinite}
+.refund{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:var(--success);background:rgba(22,163,74,.1);padding:3px 9px;border-radius:999px}
+.refund svg{width:11px;height:11px}
+
+/* commission split */
+.com-card{background:var(--navy);color:#fff;border-radius:18px;padding:26px;position:relative;overflow:hidden;margin-bottom:16px}
+.com-card::before{content:'';position:absolute;width:300px;height:300px;border-radius:50%;background:rgba(79,70,229,.35);top:-130px;right:-80px}
+.com-card::after{content:'';position:absolute;inset:0;background:var(--noise);opacity:.05;pointer-events:none;mix-blend-mode:overlay}
+.com-card h3{font-size:17px;position:relative;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.com-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0;position:relative}
+.com-grid div{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:13px;padding:14px}
+.com-grid small{font-size:11px;color:#93a0d4;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block}
+.com-grid b{font-family:var(--font-display);font-size:21px;display:block;margin-top:4px}
+.split{display:flex;height:16px;border-radius:99px;overflow:hidden;position:relative;margin-top:6px}
+.split i{display:block;height:100%}
+.split-lbl{display:flex;justify-content:space-between;font-size:11.5px;color:#93a0d4;margin-top:8px;position:relative}
+
+/* firebase */
+.fb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.fb-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;transition:.25s}
+.fb-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.fb-top{display:flex;align-items:center;gap:12px;padding:18px 18px 14px}
+.fb-ic{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex:none}
+.fb-ic svg{width:22px;height:22px}
+.fb-top b{font-size:15px;font-family:var(--font-display);display:block}
+.fb-top small{font-size:11.5px;color:var(--muted)}
+.fb-body{padding:0 18px 18px}
+pre.cfg{background:var(--navy);color:#c7d2fe;border-radius:12px;padding:14px;font-family:ui-monospace,monospace;font-size:11px;line-height:1.7;overflow-x:auto;margin-bottom:12px}
+pre.cfg .k{color:#7dd3fc}pre.cfg .v{color:#86efac}pre.cfg .c{color:#5c6799}
+.fb-foot{display:flex;gap:8px;align-items:center}
+.fb-prov{border:2px dashed var(--border);border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);cursor:pointer;transition:.25s;min-height:100%;text-align:center;padding:24px;background:none}
+.fb-prov:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-soft)}
+.fb-prov svg{width:34px;height:34px}
+.fb-prov b{font-size:14px;font-family:var(--font-display)}
+.fb-prov small{font-size:12px}
+
+/* activity feed */
+.act-item{display:flex;gap:12px;padding:11px 0;border-bottom:1px dashed var(--border);font-size:13px;align-items:flex-start}
+.act-item:last-child{border:none}
+.act-item .aic{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:none}
+.act-item .aic svg{width:15px;height:15px}
+.act-item b{font-weight:600;display:block}
+.act-item small{color:var(--muted);font-size:11.5px}
+
+/* reports */
+.rep-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.rep{display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow);transition:.25s}
+.rep:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.rep .ric{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex:none}
+.rep .ric svg{width:22px;height:22px}
+.rep b{font-size:14.5px;display:block;font-family:var(--font-display)}
+.rep small{font-size:12px;color:var(--muted)}
+.rep .btn{margin-left:auto}
+
+/* switch */
+.switch{position:relative;width:46px;height:26px;flex:none}
+.switch input{opacity:0;width:0;height:0}
+.sl{position:absolute;inset:0;background:var(--border);border-radius:99px;cursor:pointer;transition:.25s}
+.sl::before{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.25s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.switch input:checked + .sl{background:var(--primary)}
+.switch input:checked + .sl::before{transform:translateX(20px)}
+.fg{display:flex;flex-direction:column;gap:7px}
+.fg label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.fg input[type=text],.fg input[type=number]{border:1.5px solid var(--border);border-radius:12px;padding:11px 14px;font-size:14px;font-family:var(--font-body);background:var(--surface-2);outline:none;transition:.2s;color:var(--text)}
+.fg input:focus{border-color:var(--primary);background:var(--surface);box-shadow:0 0 0 4px var(--primary-soft)}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fg-row2{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);border-radius:13px;padding:14px 16px;margin-top:4px;gap:14px}
+.fg-row2 b{font-size:13.5px}
+.fg-row2 small{display:block;color:var(--muted);font-size:12px}
+
+/* toasts */
+#toasts{position:fixed;bottom:22px;right:22px;z-index:500;display:flex;flex-direction:column;gap:10px;align-items:flex-end;width:min(400px,92%)}
+.toast{background:var(--navy);color:#fff;padding:13px 18px;border-radius:13px;font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);animation:tIn .4s cubic-bezier(.2,.9,.3,1.2);max-width:100%}
+.toast.ok{background:#0f2e1d;border:1px solid rgba(34,197,94,.4)}
+.toast.info{border:1px solid rgba(129,140,248,.4)}
+@keyframes tIn{from{opacity:0;transform:translateY(16px) scale(.95)}}
+.toast.out{opacity:0;transform:translateY(8px);transition:.4s}
+
+.side-veil{display:none;position:fixed;inset:0;background:rgba(13,18,38,.55);z-index:95}
+.side-veil.open{display:block}
+
+@media (max-width:1280px){.kpis{grid-template-columns:repeat(2,1fr)}.fb-grid{grid-template-columns:1fr}.rep-grid{grid-template-columns:1fr}}
+@media (max-width:1024px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;left:0;top:0;bottom:0;width:282px;transform:translateX(-105%);transition:transform .35s cubic-bezier(.2,.8,.25,1);box-shadow:var(--shadow-lg)}
+  .side.open{transform:none}
+  .hamb{display:inline-flex}
+  .grid-2,.grid-2e,.fg-row{grid-template-columns:1fr}
+  .com-grid{grid-template-columns:repeat(2,1fr)}
+  .tb-search input{width:140px}.tb-search input:focus{width:170px}
+  .profile div{display:none}
+}
+@media (max-width:640px){
+  .kpis{grid-template-columns:1fr 1fr}
+  .content{padding:16px}
+  .topbar{padding:10px 14px}
+  .tb-search{display:none}
+  #toasts{left:4%;right:4%;align-items:stretch}
+}
+</style>
+</head>
+<body>
+
+<div class="demo-bar"><span class="dot"></span> PLATFORM ADMIN UI DEMO v2 — SUPER ADMIN · demo records only, nothing is connected · <a href="VendorAdmin-Demo.html">Vendor admin</a> · <a href="MainWebsite-Demo.html">Main site</a></div>
+
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="side" id="side">
+    <div class="side-brand">
+      <span class="side-logo">GBO</span>
+      <div><b>GrowBusiness Online</b><small>Platform Admin <span class="env">DEMO</span></small></div>
+    </div>
+    <nav class="side-nav">
+      <div class="nav-grp">Overview</div>
+      <button class="nav-it act" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg> Dashboard</button>
+      <button class="nav-it" data-page="vendors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l1-6h14l1 6M4 10v10h16V10M4 10h16M9 20v-6h6v6"/></svg> Vendors <span class="nb">4</span></button>
+      <button class="nav-it" data-page="customers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM21 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> Customers</button>
+      <div class="nav-grp">Money</div>
+      <button class="nav-it" data-page="deposits"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-3 8-10V5l-8-3-8 3v7c0 7 8 10 8 10zM9 12l2 2 4-4"/></svg> Security Deposits</button>
+      <button class="nav-it" data-page="payments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M6 15h4"/></svg> Payments</button>
+      <button class="nav-it" data-page="orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6v3H9zM9 4L7 6H5v14h14V6h-2l-2-2M9 11h6M9 15h4"/></svg> Orders</button>
+      <button class="nav-it" data-page="commissions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9.5 9.5 15M9 9.5l5.5 5.5"/></svg> Commissions</button>
+      <button class="nav-it" data-page="withdrawals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> Withdrawals <span class="nb">3</span></button>
+      <button class="nav-it" data-page="payouts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="19" height="13" rx="3"/><circle cx="11.5" cy="12.5" r="3"/><path d="M17 10.5h.01M17 14.5h.01"/></svg> Payouts</button>
+      <div class="nav-grp">Infrastructure</div>
+      <button class="nav-it" data-page="stores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l1-6h14l1 6M4 10v10h16V10M9 20v-6h6v6"/></svg> Stores</button>
+      <button class="nav-it" data-page="subdomains"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14 0 18M12 3c-3 3.5-3 14 0 18"/></svg> Subdomains</button>
+      <button class="nav-it" data-page="firebase"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 6v6c0 5.5 3.8 9.7 9 10 5.2-.3 9-4.5 9-10V6z"/><path d="m9 12 2 2 4-4"/></svg> Firebase Apps</button>
+      <div class="nav-grp">System</div>
+      <button class="nav-it" data-page="notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg> Notifications</button>
+      <button class="nav-it" data-page="analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg> Analytics</button>
+      <button class="nav-it" data-page="reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 15h6M9 11h2"/></svg> Reports</button>
+      <button class="nav-it" data-page="audit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2M21 12h-2M5 12H3M12 3v2"/></svg> Audit Logs</button>
+      <button class="nav-it" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.4 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.4-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z"/></svg> Settings</button>
+    </nav>
+    <div class="side-foot">
+      <button class="nav-it danger" onclick="toast('Demo: you cannot log out of a static UI preview.')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg> Logout</button>
+    </div>
+  </aside>
+  <div class="side-veil" id="sideVeil" onclick="closeSide()"></div>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <div class="topbar">
+      <button class="icon-btn hamb" onclick="openSide()" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div class="tb-title"><span id="pageTitle">Dashboard<small>Platform overview · all figures are demo data</small></span></div>
+      <div class="tb-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="gsearch" type="text" placeholder="Search vendors…" oninput="globalSearch(this.value)" aria-label="Search vendors">
+      </div>
+      <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Toggle theme">
+        <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <div class="drop">
+        <button class="icon-btn" onclick="toggleDrop('notifDrop')" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span class="badge">3</span>
+        </button>
+        <div class="drop-menu" id="notifDrop">
+          <div class="dh2">Notifications <button onclick="toast('Marked read (demo)','ok')">Mark all read</button></div>
+          <div class="nd unread"><span class="nic" style="background:var(--primary-soft);color:var(--primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>3 new withdrawal requests</b><small>₹35,000 pending review · 25 min ago</small></div></div>
+          <div class="nd unread"><span class="nic" style="background:rgba(22,163,74,.12);color:var(--success)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-3 8-10V5l-8-3-8 3v7c0 7 8 10 8 10zM9 12l2 2 4-4"/></svg></span><div><b>Deposit verified — Gadget Garage</b><small>₹1,000 confirmed · activation started · 2 hrs ago</small></div></div>
+          <div class="nd unread"><span class="nic" style="background:rgba(245,158,11,.14);color:#b45309"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg></span><div><b>Weekly platform report ready</b><small>Gross sales ₹12,50,000 (demo) · today</small></div></div>
+        </div>
+      </div>
+      <button class="profile">
+        <span class="avt">PL</span>
+        <div><b>Platform Admin</b><small>super admin · demo</small></div>
+      </button>
+    </div>
+
+    <div class="content">
+
+      <!-- ===== DASHBOARD ===== -->
+      <section class="page act" id="page-dashboard">
+        <div class="kpis">
+          <div class="kpi"><span class="ki" style="background:var(--primary-soft);color:var(--primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l1-6h14l1 6M4 10v10h16V10M4 10h16"/></svg></span><svg class="spark" viewBox="0 0 52 22" fill="none"><polyline points="0,15 10,13 20,14 30,9 40,10 52,5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><small>Total Vendors</small><b data-count="20">0</b><span class="delta nm">16 active · 4 pending</span></div>
+          <div class="kpi"><span class="ki" style="background:rgba(22,163,74,.12);color:var(--success)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><svg class="spark" viewBox="0 0 52 22" fill="none"><polyline points="0,17 12,14 24,15 36,10 46,11 52,6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><small>Active Vendors</small><b data-count="16">0</b><span class="delta up">▲ 2 this week</span></div>
+          <div class="kpi"><span class="ki" style="background:rgba(245,158,11,.14);color:#b45309"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span><svg class="spark" viewBox="0 0 52 22" fill="none"><polyline points="0,11 10,13 20,10 30,12 40,9 52,12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><small>Pending Vendors</small><b data-count="4">0</b><span class="delta dn">awaiting approval</span></div>
+          <div class="kpi"><span class="ki" style="background:rgba(14,165,233,.12);color:var(--secondary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg></span><svg class="spark" viewBox="0 0 52 22" fill="none"><polyline points="0,18 12,16 24,13 36,11 46,8 52,6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><small>Total Customers</small><b data-count="3000">0</b><span class="delta up">▲ 182 this month</span></div>
+          <div class="kpi"><span class="ki" style="background:rgba(124,58,237,.12);color:var(--primary-2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6v3H9zM9 4L7 6H5v14h14V6h-2l-2-2M9 11h6M9 15h4"/></svg></span><svg class="spark" viewBox="0 0 52 22" fill="none"><polyline points="0,16 10,18 20,12 30,14 40,8 52,9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><small>Total Orders</small><b data-count="1245">0</b><span class="delta up">▲ 96 this week</span></div>
+          <div class="kpi"><span class="ki" style="background:var(--primary-soft);color:var(--primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span><svg class="spark" viewBox="0 0 52 22" fill="none"><polyline points="0,19 10,16 20,17 30,11 40,13 52,5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><small>Gross Sales</small><b data-count="1250000" data-prefix="₹">0</b><span class="delta up">▲ 14.2% MoM</span></div>
+          <div class="kpi"><span class="ki" style="background:rgba(22,163,74,.12);color:var(--success)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9.5 9.5 15M9 9.5l5.5 5.5"/></svg></span><svg class="spark" viewBox="0 0 52 22" fill="none"><polyline points="0,17 10,15 20,12 30,13 40,8 52,6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><small>Platform Commission</small><b data-count="62500" data-prefix="₹">₹0</b><span class="delta nm">5% of gross sales</span></div>
+          <div class="kpi warn"><span class="ki" style="background:rgba(245,158,11,.16);color:#b45309"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg></span><svg class="spark" viewBox="0 0 52 22" fill="none"><polyline points="0,9 10,12 20,10 30,14 40,11 52,13" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><small>Pending Withdrawals</small><b data-count="35000" data-prefix="₹">₹0</b><span class="delta dn">3 requests to review</span></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-h"><h3>Gross sales — last 8 weeks</h3><span class="pill p-amber">DEMO DATA</span></div>
+            <svg class="chart-svg" viewBox="0 0 560 190" preserveAspectRatio="none">
+              <g stroke="var(--border)" stroke-width="1"><line x1="0" y1="38" x2="560" y2="38"/><line x1="0" y1="86" x2="560" y2="86"/><line x1="0" y1="134" x2="560" y2="134"/><line x1="0" y1="182" x2="560" y2="182"/></g>
+              <path d="M20 158 L90 140 L160 148 L230 108 L300 118 L370 82 L440 92 L510 48 L540 40 L540 186 L20 186 Z" fill="url(#pg)"/>
+              <path class="draw-line" d="M20 158 L90 140 L160 148 L230 108 L300 118 L370 82 L440 92 L510 48 L540 40" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/>
+              <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#4f46e5" stop-opacity=".22"/><stop offset="1" stop-color="#4f46e5" stop-opacity="0"/></linearGradient></defs>
+            </svg>
+            <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted)"><span>W1</span><span>W2</span><span>W3</span><span>W4</span><span>W5</span><span>W6</span><span>W7</span><span style="color:var(--primary);font-weight:700">W8 · ₹1,82,000</span></div>
+          </div>
+          <div class="panel">
+            <div class="panel-h"><h3>Orders per week</h3></div>
+            <svg class="chart-svg" viewBox="0 0 300 180" preserveAspectRatio="none">
+              <g stroke="var(--border)" stroke-width="1"><line x1="0" y1="40" x2="300" y2="40"/><line x1="0" y1="90" x2="300" y2="90"/><line x1="0" y1="140" x2="300" y2="140"/><line x1="0" y1="178" x2="300" y2="178"/></g>
+              <rect class="bar" x="10"  y="120" width="26" height="58"  rx="6" fill="var(--primary-soft)" style="transition-delay:.05s"/>
+              <rect class="bar" x="52"  y="100" width="26" height="78"  rx="6" fill="var(--primary-soft)" style="transition-delay:.12s"/>
+              <rect class="bar" x="94"  y="128" width="26" height="50"  rx="6" fill="var(--primary-soft)" style="transition-delay:.19s"/>
+              <rect class="bar" x="136" y="88"  width="26" height="90"  rx="6" fill="var(--primary-soft)" style="transition-delay:.26s"/>
+              <rect class="bar" x="178" y="98"  width="26" height="80"  rx="6" fill="var(--primary-soft)" style="transition-delay:.33s"/>
+              <rect class="bar" x="220" y="64"  width="26" height="114" rx="6" fill="var(--primary-soft)" style="transition-delay:.4s"/>
+              <rect class="bar" x="262" y="34"  width="26" height="144" rx="6" fill="url(#pbg)" style="transition-delay:.47s"/>
+              <defs><linearGradient id="pbg" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#4f46e5"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
+            </svg>
+            <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted)"><span>W2</span><span>W3</span><span>W4</span><span>W5</span><span>W6</span><span>W7</span><span style="color:var(--primary);font-weight:700">W8 · 198</span></div>
+          </div>
+        </div>
+
+        <div class="grid-2e">
+          <div class="panel">
+            <div class="panel-h"><h3>Recent system activity</h3><span class="pill p-gray">DEMO FEED</span></div>
+            <div class="act-item"><span class="aic" style="background:rgba(22,163,74,.12);color:var(--success)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-3 8-10V5l-8-3-8 3v7c0 7 8 10 8 10zM9 12l2 2 4-4"/></svg></span><div><b>Deposit verified — Gadget Garage</b><small>₹1,000 · activation countdown started · 2 hrs ago</small></div></div>
+            <div class="act-item"><span class="aic" style="background:var(--primary-soft);color:var(--primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg></span><div><b>3 withdrawal requests pending</b><small>₹35,000 total · needs review · 25 min ago</small></div></div>
+            <div class="act-item"><span class="aic" style="background:rgba(14,165,233,.12);color:var(--secondary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14 0 18M12 3c-3 3.5-3 14 0 18"/></svg></span><div><b>Subdomain provisioned</b><small>urban.growbusinessonline.com · SSL issued · 24 Feb</small></div></div>
+            <div class="act-item"><span class="aic" style="background:rgba(245,158,11,.14);color:#b45309"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg></span><div><b>Deposit unverified — BookNook</b><small>₹1,000 could not be verified · 25 Feb</small></div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-h"><h3>Top vendors by sales</h3><span class="pill p-amber">DEMO DATA</span></div>
+            <div class="act-item"><span class="aic" style="background:linear-gradient(135deg,#4f46e5,#0ea5e9);color:#fff"><b style="font-size:12px">A</b></span><div style="flex:1"><b>ABC Mobile Store</b><small>₹1,25,500 · 156 orders</small></div><b style="font-family:var(--font-display);color:var(--primary)">#1</b></div>
+            <div class="act-item"><span class="aic" style="background:linear-gradient(135deg,#0ea5e9,#10b981);color:#fff"><b style="font-size:12px">X</b></span><div style="flex:1"><b>XYZ Electronics</b><small>₹98,400 · 132 orders</small></div><b style="font-family:var(--font-display);color:var(--primary)">#2</b></div>
+            <div class="act-item"><span class="aic" style="background:linear-gradient(135deg,#7c3aed,#e11d48);color:#fff"><b style="font-size:12px">F</b></span><div style="flex:1"><b>Fashion Hub</b><small>₹86,200 · 204 orders</small></div><b style="font-family:var(--font-display);color:var(--primary)">#3</b></div>
+            <div class="act-item"><span class="aic" style="background:linear-gradient(135deg,#f59e0b,#e11d48);color:#fff"><b style="font-size:12px">S</b></span><div style="flex:1"><b>Smart Accessories</b><small>₹54,300 · 98 orders</small></div><b style="font-family:var(--font-display);color:var(--primary)">#4</b></div>
+          </div>
+        </div>
+
+        <div class="panel" style="padding:0;overflow:hidden">
+          <div class="panel-h" style="padding:20px 20px 12px"><h3>Vendor overview</h3><button class="link" onclick="go('vendors')">Manage vendors →</button></div>
+          <div class="twrap" style="border:none;box-shadow:none;border-radius:0">
+            <table class="tbl" id="dashVendorTable">
+              <thead><tr><th>Vendor</th><th>Business</th><th>Subdomain</th><th>Deposit</th><th>Status</th><th>Orders</th><th>Sales</th><th>Action</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== VENDORS ===== -->
+      <section class="page" id="page-vendors">
+        <div class="page-head"><div><h1>Vendors</h1><p>20 registered · 16 active · 4 pending approval</p></div>
+          <span style="display:flex;gap:6px"><button class="chip act" data-vf="all" onclick="vf(this,'all')">All</button><button class="chip" data-vf="Active" onclick="vf(this,'Active')">Active</button><button class="chip" data-vf="Pending" onclick="vf(this,'Pending')">Pending</button><button class="chip" data-vf="Suspended" onclick="vf(this,'Suspended')">Suspended</button></span>
+        </div>
+        <div class="twrap">
+          <table class="tbl">
+            <thead><tr><th>Vendor</th><th>Business</th><th>Subdomain</th><th>Deposit</th><th>Status</th><th>Orders</th><th>Sales</th><th>Action</th></tr></thead>
+            <tbody id="vendorBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== CUSTOMERS ===== -->
+      <section class="page" id="page-customers">
+        <div class="page-head"><div><h1>Customers</h1><p>Platform-wide customer records · demo data</p></div></div>
+        <div class="twrap">
+          <table class="tbl">
+            <thead><tr><th>Customer</th><th>City</th><th>Registered</th><th>Stores shopped</th><th>Orders</th><th>Total spent</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#4f46e5,#0ea5e9)">AG</span> Ananya Gupta</td><td>Chandigarh</td><td>Nov 2025</td><td>3</td><td>12</td><td><b>₹1,42,600</b></td><td><span class="pill p-green">Active</span></td></tr>
+              <tr><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#10b981,#0d9488)">PN</span> Priya Nair</td><td>Mumbai</td><td>Dec 2025</td><td>2</td><td>8</td><td><b>₹76,400</b></td><td><span class="pill p-green">Active</span></td></tr>
+              <tr><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#f59e0b,#f97316)">RV</span> Rohit Verma</td><td>Delhi</td><td>Jan 2026</td><td>4</td><td>15</td><td><b>₹98,200</b></td><td><span class="pill p-green">Active</span></td></tr>
+              <tr><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#7c3aed,#e11d48)">MI</span> Meera Iyer</td><td>Bengaluru</td><td>Jan 2026</td><td>1</td><td>4</td><td><b>₹62,500</b></td><td><span class="pill p-green">Active</span></td></tr>
+              <tr><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8)">KS</span> Karan Singh</td><td>Lucknow</td><td>Feb 2026</td><td>2</td><td>2</td><td><b>₹9,800</b></td><td><span class="pill p-blue">New</span></td></tr>
+              <tr><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#334155,#64748b)">DK</span> Deepa Krishnan</td><td>Kochi</td><td>Feb 2026</td><td>0</td><td>0</td><td>₹0</td><td><span class="pill p-gray">Inactive</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== SECURITY DEPOSITS ===== -->
+      <section class="page" id="page-deposits">
+        <div class="page-head"><div><h1>Security Deposits</h1><p>₹1,000 refundable deposit collected per vendor</p></div><span class="pill p-amber">DEMO DATA</span></div>
+        <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-3 8-10V5l-8-3-8 3v7c0 7 8 10 8 10zM12 8v5M12 16h.01"/></svg> Demo data — no real deposits were collected. Activation countdowns are simulated.</div>
+        <div class="twrap">
+          <table class="tbl">
+            <thead><tr><th>Vendor</th><th>Business</th><th>Deposit</th><th>Payment</th><th>Activation</th><th>Refundable</th></tr></thead>
+            <tbody>
+              <tr><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#4f46e5,#0ea5e9)">AS</span> Arjun Sharma</td><td>ABC Mobile Store</td><td><b>₹1,000</b></td><td><span class="pill p-green">Verified</span></td><td><span class="pill p-green">Active since 12 Jan</span></td><td><span class="refund"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Refundable</span></td></tr>
+              <tr><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#0ea5e9,#10b981)">RM</span> Riya Mehta</td><td>XYZ Electronics</td><td><b>₹1,000</b></td><td><span class="pill p-green">Verified</span></td><td><span class="pill p-green">Active since 19 Jan</span></td><td><span class="refund"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Refundable</span></td></tr>
+              <tr><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#7c3aed,#e11d48)">FA</span> Farhan Ali</td><td>Fashion Hub</td><td><b>₹1,000</b></td><td><span class="pill p-green">Verified</span></td><td><span class="pill p-green">Active since 28 Jan</span></td><td><span class="refund"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Refundable</span></td></tr>
+              <tr><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#f59e0b,#e11d48)">NJ</span> Neha Joshi</td><td>Smart Accessories</td><td><b>₹1,000</b></td><td><span class="pill p-green">Verified</span></td><td><span class="pill p-green">Active since 05 Feb</span></td><td><span class="refund"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Refundable</span></td></tr>
+              <tr><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#10b981,#0d9488)">VR</span> Vikram Rao</td><td>Gadget Garage</td><td><b>₹1,000</b></td><td><span class="pill p-green">Verified</span></td><td style="display:flex;flex-direction:column;gap:5px;align-items:flex-start"><span class="pill p-amber">Pending</span><span class="cd" data-cd="96000">--:--:--</span></td><td><span class="refund"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Refundable</span></td></tr>
+              <tr><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#334155,#0d1226)">IG</span> Ishaan Gupta</td><td>Urban Threads</td><td><b>₹1,000</b></td><td><span class="pill p-green">Verified</span></td><td style="display:flex;flex-direction:column;gap:5px;align-items:flex-start"><span class="pill p-amber">Pending</span><span class="cd" data-cd="54000">--:--:--</span></td><td><span class="refund"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Refundable</span></td></tr>
+              <tr><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#e11d48,#7c3aed)">PD</span> Priyanka Das</td><td>Beauty Bloom</td><td><b>₹1,000</b></td><td><span class="pill p-amber">Unverified</span></td><td><span class="pill p-gray">Awaiting verification</span></td><td><span class="refund"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Refundable</span></td></tr>
+              <tr><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#0ea5e9,#4f46e5)">RM</span> Rohit Malhotra</td><td>BookNook</td><td><b>₹1,000</b></td><td><span class="pill p-red">Unverified</span></td><td><span class="pill p-gray">Awaiting verification</span></td><td><span class="refund"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Refundable</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== PAYMENTS ===== -->
+      <section class="page" id="page-payments">
+        <div class="page-head"><div><h1>Payments</h1><p>Customer payments flowing through the platform</p></div></div>
+        <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-3 8-10V5l-8-3-8 3v7c0 7 8 10 8 10zM12 8v5M12 16h.01"/></svg> Demo data — no real transaction. Records below are visual placeholders.</div>
+        <div class="twrap">
+          <table class="tbl">
+            <thead><tr><th>Payment</th><th>Order</th><th>Vendor</th><th>Date</th><th>Amount</th><th>Commission</th><th>Method</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">PAY-2026-0412</td><td class="mono">#GBO1042</td><td>ABC Mobile Store</td><td>24 Feb 2026</td><td><b>₹12,999</b></td><td>₹650</td><td>UPI</td><td><span class="pill p-green">Settled</span></td></tr>
+              <tr><td class="mono">PAY-2026-0409</td><td class="mono">#GBO1040</td><td>ABC Mobile Store</td><td>23 Feb 2026</td><td><b>₹34,999</b></td><td>₹1,750</td><td>Card</td><td><span class="pill p-amber">Pending</span></td></tr>
+              <tr><td class="mono">PAY-2026-0401</td><td class="mono">#GBO1036</td><td>XYZ Electronics</td><td>22 Feb 2026</td><td><b>₹58,990</b></td><td>₹2,950</td><td>Card</td><td><span class="pill p-green">Settled</span></td></tr>
+              <tr><td class="mono">PAY-2026-0395</td><td class="mono">#GBO1032</td><td>Fashion Hub</td><td>21 Feb 2026</td><td><b>₹3,499</b></td><td>₹175</td><td>UPI</td><td><span class="pill p-green">Settled</span></td></tr>
+              <tr><td class="mono">PAY-2026-0388</td><td class="mono">#GBO1028</td><td>Smart Accessories</td><td>19 Feb 2026</td><td><b>₹1,599</b></td><td>₹80</td><td>COD</td><td><span class="pill p-amber">Pending</span></td></tr>
+              <tr><td class="mono">PAY-2026-0380</td><td class="mono">#GBO1021</td><td>Fashion Hub</td><td>17 Feb 2026</td><td><b>₹8,200</b></td><td>₹410</td><td>UPI</td><td><span class="pill p-red">Refunded</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== ORDERS ===== -->
+      <section class="page" id="page-orders">
+        <div class="page-head"><div><h1>Orders</h1><p>Platform-wide order flow · demo data</p></div></div>
+        <div class="twrap">
+          <table class="tbl">
+            <thead><tr><th>Order</th><th>Store</th><th>Customer</th><th>Amount</th><th>Commission</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">#GBO1042</td><td>ABC Mobile Store</td><td>Ananya Gupta</td><td><b>₹12,999</b></td><td>₹650</td><td><span class="pill p-blue">Shipped</span></td><td>24 Feb 2026</td></tr>
+              <tr><td class="mono">#GBO1041</td><td>ABC Mobile Store</td><td>Rohit Verma</td><td><b>₹4,299</b></td><td>₹215</td><td><span class="pill p-green">Delivered</span></td><td>23 Feb 2026</td></tr>
+              <tr><td class="mono">#GBO1040</td><td>ABC Mobile Store</td><td>Meera Iyer</td><td><b>₹34,999</b></td><td>₹1,750</td><td><span class="pill p-amber">Processing</span></td><td>23 Feb 2026</td></tr>
+              <tr><td class="mono">#GBO1039</td><td>Smart Accessories</td><td>Karan Singh</td><td><b>₹1,799</b></td><td>₹90</td><td><span class="pill p-green">Delivered</span></td><td>22 Feb 2026</td></tr>
+              <tr><td class="mono">#GBO1038</td><td>ABC Mobile Store</td><td>Sana Khan</td><td><b>₹24,990</b></td><td>₹1,250</td><td><span class="pill p-blue">Shipped</span></td><td>22 Feb 2026</td></tr>
+              <tr><td class="mono">#GBO1037</td><td>ABC Mobile Store</td><td>Dev Patel</td><td><b>₹899</b></td><td>₹45</td><td><span class="pill p-red">Cancelled</span></td><td>21 Feb 2026</td></tr>
+              <tr><td class="mono">#GBO1036</td><td>XYZ Electronics</td><td>Ishaan Rao</td><td><b>₹58,990</b></td><td>₹2,950</td><td><span class="pill p-amber">Processing</span></td><td>20 Feb 2026</td></tr>
+              <tr><td class="mono">#GBO1035</td><td>Fashion Hub</td><td>Priya Nair</td><td><b>₹9,800</b></td><td>₹490</td><td><span class="pill p-green">Delivered</span></td><td>20 Feb 2026</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== COMMISSIONS ===== -->
+      <section class="page" id="page-commissions">
+        <div class="page-head"><div><h1>Commissions</h1><p>Platform earns 5% on every settled order</p></div></div>
+        <div class="com-card">
+          <h3>Commission breakdown <span class="pill p-amber" style="background:rgba(255,255,255,.15);color:#fcd34d">DEMO RECORD</span></h3>
+          <div class="com-grid">
+            <div><small>Order</small><b class="mono" style="font-size:18px">#GBO1001</b></div>
+            <div><small>Order Amount</small><b>₹10,000</b></div>
+            <div><small>Commission Rate</small><b>5%</b></div>
+            <div><small>Platform Commission</small><b style="color:#86efac">₹500</b></div>
+          </div>
+          <div class="split"><i style="width:95%;background:linear-gradient(90deg,#0ea5e9,#10b981)"></i><i style="width:5%;background:linear-gradient(90deg,#4f46e5,#7c3aed)"></i></div>
+          <div class="split-lbl"><span>Vendor receives: <b style="color:#fff">₹9,500</b></span><span>Platform keeps: <b style="color:#c4b5fd">₹500</b></span></div>
+        </div>
+        <div class="twrap">
+          <table class="tbl">
+            <thead><tr><th>Order</th><th>Vendor</th><th>Order Amount</th><th>Rate</th><th>Platform Commission</th><th>Vendor Amount</th><th>Date</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">#GBO1001</td><td>ABC Mobile Store</td><td><b>₹10,000</b></td><td>5%</td><td><b style="color:var(--primary)">₹500</b></td><td>₹9,500</td><td>04 Feb 2026</td></tr>
+              <tr><td class="mono">#GBO1042</td><td>ABC Mobile Store</td><td><b>₹12,999</b></td><td>5%</td><td><b style="color:var(--primary)">₹650</b></td><td>₹12,349</td><td>24 Feb 2026</td></tr>
+              <tr><td class="mono">#GBO1038</td><td>ABC Mobile Store</td><td><b>₹24,990</b></td><td>5%</td><td><b style="color:var(--primary)">₹1,250</b></td><td>₹23,740</td><td>22 Feb 2026</td></tr>
+              <tr><td class="mono">#GBO1036</td><td>XYZ Electronics</td><td><b>₹58,990</b></td><td>5%</td><td><b style="color:var(--primary)">₹2,950</b></td><td>₹56,040</td><td>20 Feb 2026</td></tr>
+              <tr><td class="mono">#GBO1035</td><td>Fashion Hub</td><td><b>₹9,800</b></td><td>5%</td><td><b style="color:var(--primary)">₹490</b></td><td>₹9,310</td><td>20 Feb 2026</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== WITHDRAWALS ===== -->
+      <section class="page" id="page-withdrawals">
+        <div class="page-head"><div><h1>Withdrawals</h1><p>Vendor payout requests awaiting review</p></div><span class="pill p-amber">₹35,000 PENDING · DEMO</span></div>
+        <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-3 8-10V5l-8-3-8 3v7c0 7 8 10 8 10zM12 8v5M12 16h.01"/></svg> Demo data — no real money. Approve/Reject only updates this preview.</div>
+        <div class="twrap">
+          <table class="tbl" id="wdTable">
+            <thead><tr><th>Request</th><th>Vendor</th><th>Amount</th><th>Method</th><th>Requested</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr data-vend="ABC Mobile Store"><td class="mono">WD-2081</td><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#4f46e5,#0ea5e9)">AS</span> ABC Mobile Store</td><td><b>₹15,000</b></td><td>Bank ••4521</td><td>25 Feb 2026</td><td class="st"><span class="pill p-amber">Pending</span></td><td class="act"><button class="btn btn-ok btn-sm" onclick="wdAct(this,'Approve')">Approve</button> <button class="btn btn-no btn-sm" onclick="wdAct(this,'Reject')">Reject</button></td></tr>
+              <tr data-vend="XYZ Electronics"><td class="mono">WD-2080</td><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#0ea5e9,#10b981)">RM</span> XYZ Electronics</td><td><b>₹10,000</b></td><td>UPI</td><td>24 Feb 2026</td><td class="st"><span class="pill p-amber">Pending</span></td><td class="act"><button class="btn btn-ok btn-sm" onclick="wdAct(this,'Approve')">Approve</button> <button class="btn btn-no btn-sm" onclick="wdAct(this,'Reject')">Reject</button></td></tr>
+              <tr data-vend="Fashion Hub"><td class="mono">WD-2079</td><td class="nm2"><span class="mini-av" style="background:linear-gradient(135deg,#7c3aed,#e11d48)">FA</span> Fashion Hub</td><td><b>₹10,000</b></td><td>Bank ••9034</td><td>23 Feb 2026</td><td class="st"><span class="pill p-amber">Pending</span></td><td class="act"><button class="btn btn-ok btn-sm" onclick="wdAct(this,'Approve')">Approve</button> <button class="btn btn-no btn-sm" onclick="wdAct(this,'Reject')">Reject</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== PAYOUTS ===== -->
+      <section class="page" id="page-payouts">
+        <div class="page-head"><div><h1>Payouts</h1><p>Scheduled vendor payout batches</p></div></div>
+        <div class="twrap">
+          <table class="tbl">
+            <thead><tr><th>Batch</th><th>Date</th><th>Vendors</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">P-2026-018</td><td>15 Feb 2026</td><td>5 vendors</td><td><b>₹62,500</b></td><td>NEFT / UPI</td><td><span class="pill p-green">Completed</span></td></tr>
+              <tr><td class="mono">P-2026-017</td><td>01 Feb 2026</td><td>4 vendors</td><td><b>₹48,200</b></td><td>NEFT / UPI</td><td><span class="pill p-green">Completed</span></td></tr>
+              <tr><td class="mono">P-2026-016</td><td>15 Jan 2026</td><td>3 vendors</td><td><b>₹31,000</b></td><td>NEFT</td><td><span class="pill p-green">Completed</span></td></tr>
+              <tr><td class="mono">P-2026-019</td><td>15 Mar 2026 (scheduled)</td><td>—</td><td><b>₹0</b></td><td>—</td><td><span class="pill p-gray">Scheduled</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== STORES ===== -->
+      <section class="page" id="page-stores">
+        <div class="page-head"><div><h1>Stores</h1><p>Vendor storefronts on the platform</p></div><button class="btn btn-primary" onclick="toast('Demo: provisioning a store is not wired up.')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Provision Store</button></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+          <div class="panel" style="margin:0"><div style="display:flex;gap:13px;align-items:center;margin-bottom:14px"><span class="mini-av" style="width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#4f46e5,#0ea5e9)">A</span><div><b style="font-family:var(--font-display);font-size:15px">ABC Mobile Store</b><br><small class="mono" style="color:var(--primary);font-size:11.5px">abc.growbusinessonline.com</small></div><span class="pill p-green" style="margin-left:auto">Live</span></div><div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);border-top:1px dashed var(--border);padding-top:12px"><span>84 products</span><span>156 orders</span><span>₹1,25,500 sales</span></div><div style="margin-top:14px;display:flex;gap:8px"><a class="btn btn-ghost btn-sm" href="VendorStore-Demo.html">Preview</a><button class="btn btn-primary btn-sm" onclick="toast('Demo: vendor management is not wired up.')">Manage</button></div></div>
+          <div class="panel" style="margin:0"><div style="display:flex;gap:13px;align-items:center;margin-bottom:14px"><span class="mini-av" style="width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#0ea5e9,#10b981)">X</span><div><b style="font-family:var(--font-display);font-size:15px">XYZ Electronics</b><br><small class="mono" style="color:var(--primary);font-size:11.5px">xyz.growbusinessonline.com</small></div><span class="pill p-green" style="margin-left:auto">Live</span></div><div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);border-top:1px dashed var(--border);padding-top:12px"><span>132 products</span><span>132 orders</span><span>₹98,400 sales</span></div><div style="margin-top:14px;display:flex;gap:8px"><button class="btn btn-ghost btn-sm" onclick="toast('Demo: only the ABC Mobile Store preview is included.')">Preview</button><button class="btn btn-primary btn-sm" onclick="toast('Demo: vendor management is not wired up.')">Manage</button></div></div>
+          <div class="panel" style="margin:0"><div style="display:flex;gap:13px;align-items:center;margin-bottom:14px"><span class="mini-av" style="width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#7c3aed,#e11d48)">F</span><div><b style="font-family:var(--font-display);font-size:15px">Fashion Hub</b><br><small class="mono" style="color:var(--primary);font-size:11.5px">fashion.growbusinessonline.com</small></div><span class="pill p-green" style="margin-left:auto">Live</span></div><div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);border-top:1px dashed var(--border);padding-top:12px"><span>260 products</span><span>204 orders</span><span>₹86,200 sales</span></div><div style="margin-top:14px;display:flex;gap:8px"><button class="btn btn-ghost btn-sm" onclick="toast('Demo: only the ABC Mobile Store preview is included.')">Preview</button><button class="btn btn-primary btn-sm" onclick="toast('Demo: vendor management is not wired up.')">Manage</button></div></div>
+        </div>
+      </section>
+
+      <!-- ===== SUBDOMAINS ===== -->
+      <section class="page" id="page-subdomains">
+        <div class="page-head"><div><h1>Subdomains</h1><p>Vendor domains on *.growbusinessonline.com</p></div></div>
+        <div class="twrap">
+          <table class="tbl">
+            <thead><tr><th>Subdomain</th><th>Vendor</th><th>Created</th><th>SSL</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td class="mono" style="font-weight:600">abc.growbusinessonline.com</td><td>ABC Mobile Store</td><td>12 Jan 2026</td><td><span class="pill p-green">Valid</span></td><td><span class="pill p-green">Active</span></td><td><button class="btn btn-no btn-sm" onclick="toast('Demo: suspending subdomains is not wired up.')">Suspend</button></td></tr>
+              <tr><td class="mono" style="font-weight:600">xyz.growbusinessonline.com</td><td>XYZ Electronics</td><td>19 Jan 2026</td><td><span class="pill p-green">Valid</span></td><td><span class="pill p-green">Active</span></td><td><button class="btn btn-no btn-sm" onclick="toast('Demo: suspending subdomains is not wired up.')">Suspend</button></td></tr>
+              <tr><td class="mono" style="font-weight:600">fashion.growbusinessonline.com</td><td>Fashion Hub</td><td>28 Jan 2026</td><td><span class="pill p-green">Valid</span></td><td><span class="pill p-green">Active</span></td><td><button class="btn btn-no btn-sm" onclick="toast('Demo: suspending subdomains is not wired up.')">Suspend</button></td></tr>
+              <tr><td class="mono" style="font-weight:600">smart.growbusinessonline.com</td><td>Smart Accessories</td><td>05 Feb 2026</td><td><span class="pill p-green">Valid</span></td><td><span class="pill p-green">Active</span></td><td><button class="btn btn-no btn-sm" onclick="toast('Demo: suspending subdomains is not wired up.')">Suspend</button></td></tr>
+              <tr><td class="mono" style="font-weight:600">gadget.growbusinessonline.com</td><td>Gadget Garage</td><td>23 Feb 2026</td><td><span class="pill p-green">Valid</span></td><td><span class="pill p-amber">Provisioning</span></td><td><span class="pill p-gray">In progress…</span></td></tr>
+              <tr><td class="mono" style="font-weight:600">urban.growbusinessonline.com</td><td>Urban Threads</td><td>24 Feb 2026</td><td><span class="pill p-amber">Issuing</span></td><td><span class="pill p-amber">Provisioning</span></td><td><span class="pill p-gray">In progress…</span></td></tr>
+              <tr><td class="mono" style="font-weight:600">beauty.growbusinessonline.com</td><td>Beauty Bloom</td><td>25 Feb 2026</td><td><span class="pill p-gray">Not issued</span></td><td><span class="pill p-gray">Reserved</span></td><td><button class="btn btn-ghost btn-sm" onclick="toast('Demo: provisioning simulated — nothing real happens.')">Provision (demo)</button></td></tr>
+              <tr><td class="mono" style="font-weight:600">booknook.growbusinessonline.com</td><td>BookNook</td><td>25 Feb 2026</td><td><span class="pill p-gray">Not issued</span></td><td><span class="pill p-gray">Reserved</span></td><td><button class="btn btn-ghost btn-sm" onclick="toast('Demo: provisioning simulated — nothing real happens.')">Provision (demo)</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== FIREBASE APPS ===== -->
+      <section class="page" id="page-firebase">
+        <div class="page-head"><div><h1>Firebase Apps</h1><p>App configs the platform provisions per environment</p></div></div>
+        <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-3 8-10V5l-8-3-8 3v7c0 7 8 10 8 10zM12 8v5M12 16h.01"/></svg> Visual demo records only — these are NOT connected to Firebase and contain no real keys.</div>
+        <div class="fb-grid">
+          <div class="fb-card">
+            <div class="fb-top"><span class="fb-ic" style="background:linear-gradient(135deg,#f59e0b,#ff7043)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 4.6 5 2h4.1L7.5 15.3 3.9 4.6zM14.6 2h3.1l-3.9 10.5h-4.6L14.6 2zm.9 9.2 1-2.8 3.5-9.4H22l-6.5 17.3h-4.2l5.2-14.5zm-8 14.5h3.1v-7.6h-3.1v7.6z" opacity=".9"/></svg></span><div><b>Vendor App</b><small>Customer-facing vendor stores</small></div><span class="pill p-green" style="margin-left:auto">Simulated</span></div>
+            <div class="fb-body">
+              <pre class="cfg"><span class="c">// firebase.json (demo)</span>
+{
+  <span class="k">"project_id"</span>: <span class="v">"Demo-Vendor-App"</span>,
+  <span class="k">"api_key"</span>: <span class="v">"DEMO_KEY_DO_NOT_USE"</span>,
+  <span class="k">"app_id"</span>: <span class="v">"1:0000demo:web:abc123"</span>,
+  <span class="k">"status"</span>: <span class="v">"provisioned (demo)"</span>
+}</pre>
+              <div class="fb-foot"><button class="btn btn-ghost btn-sm" onclick="toast('Demo: regenerating config is not wired up.')">Regenerate</button><button class="btn btn-ghost btn-sm" onclick="toast('Demo: app logs are not available.')">View logs</button></div>
+            </div>
+          </div>
+          <div class="fb-card">
+            <div class="fb-top"><span class="fb-ic" style="background:linear-gradient(135deg,#4f46e5,#0ea5e9)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 4.6 5 2h4.1L7.5 15.3 3.9 4.6zM14.6 2h3.1l-3.9 10.5h-4.6L14.6 2zm.9 9.2 1-2.8 3.5-9.4H22l-6.5 17.3h-4.2l5.2-14.5zm-8 14.5h3.1v-7.6h-3.1v7.6z" opacity=".9"/></svg></span><div><b>Customer App</b><small>Buyer marketplace application</small></div><span class="pill p-green" style="margin-left:auto">Simulated</span></div>
+            <div class="fb-body">
+              <pre class="cfg"><span class="c">// firebase.json (demo)</span>
+{
+  <span class="k">"project_id"</span>: <span class="v">"Demo-Customer-App"</span>,
+  <span class="k">"api_key"</span>: <span class="v">"DEMO_KEY_DO_NOT_USE"</span>,
+  <span class="k">"app_id"</span>: <span class="v">"1:0000demo:web:xyz789"</span>,
+  <span class="k">"status"</span>: <span class="v">"provisioned (demo)"</span>
+}</pre>
+              <div class="fb-foot"><button class="btn btn-ghost btn-sm" onclick="toast('Demo: regenerating config is not wired up.')">Regenerate</button><button class="btn btn-ghost btn-sm" onclick="toast('Demo: app logs are not available.')">View logs</button></div>
+            </div>
+          </div>
+          <div class="fb-card">
+            <div class="fb-top"><span class="fb-ic" style="background:linear-gradient(135deg,#7c3aed,#e11d48)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 4.6 5 2h4.1L7.5 15.3 3.9 4.6zM14.6 2h3.1l-3.9 10.5h-4.6L14.6 2zm.9 9.2 1-2.8 3.5-9.4H22l-6.5 17.3h-4.2l5.2-14.5zm-8 14.5h3.1v-7.6h-3.1v7.6z" opacity=".9"/></svg></span><div><b>Vendor Admin</b><small>Vendor dashboard application</small></div><span class="pill p-green" style="margin-left:auto">Simulated</span></div>
+            <div class="fb-body">
+              <pre class="cfg"><span class="c">// firebase.json (demo)</span>
+{
+  <span class="k">"project_id"</span>: <span class="v">"Demo-Vendor-Admin"</span>,
+  <span class="k">"api_key"</span>: <span class="v">"DEMO_KEY_DO_NOT_USE"</span>,
+  <span class="k">"app_id"</span>: <span class="v">"1:0000demo:web:qrs456"</span>,
+  <span class="k">"status"</span>: <span class="v">"provisioned (demo)"</span>
+}</pre>
+              <div class="fb-foot"><button class="btn btn-ghost btn-sm" onclick="toast('Demo: regenerating config is not wired up.')">Regenerate</button><button class="btn btn-ghost btn-sm" onclick="toast('Demo: app logs are not available.')">View logs</button></div>
+            </div>
+          </div>
+          <button class="fb-prov" onclick="toast('Demo: provisioning a new Firebase app is not wired up.')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            <b>Provision new app</b>
+            <small>Add a Firebase project for a new environment (demo)</small>
+          </button>
+        </div>
+      </section>
+
+      <!-- ===== NOTIFICATIONS ===== -->
+      <section class="page" id="page-notifications">
+        <div class="page-head"><div><h1>Notifications</h1><p>System events &amp; platform broadcasts</p></div></div>
+        <div class="grid-2e" style="grid-template-columns:1.2fr .8fr">
+          <div class="panel">
+            <div class="panel-h"><h3>Recent system events</h3></div>
+            <div class="nd"><span class="nic" style="background:var(--primary-soft);color:var(--primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><div><b>Store activated — ABC Mobile Store</b><small>abc.growbusinessonline.com is live · 12 Jan 2026</small></div></div>
+            <div class="nd"><span class="nic" style="background:rgba(22,163,74,.12);color:var(--success)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg></span><div><b>Payout batch P-2026-018 completed</b><small>5 vendors · ₹62,500 (demo) · 15 Feb 2026</small></div></div>
+            <div class="nd"><span class="nic" style="background:rgba(245,158,11,.14);color:#b45309"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg></span><div><b>Payment verification failed — BookNook</b><small>Deposit ₹1,000 could not be verified · 25 Feb 2026</small></div></div>
+            <div class="nd"><span class="nic" style="background:rgba(14,165,233,.12);color:var(--secondary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14 0 18M12 3c-3 3.5-3 14 0 18"/></svg></span><div><b>Subdomain provisioned — urban.growbusinessonline.com</b><small>SSL certificate issued (demo) · 24 Feb 2026</small></div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-h"><h3>Broadcast to vendors</h3></div>
+            <div class="fg" style="gap:12px">
+              <div><label>Subject</label><input type="text" placeholder="e.g. New payout schedule from March" style="width:100%;border:1.5px solid var(--border);border-radius:12px;padding:10px 13px;font-size:13.5px;background:var(--surface-2);font-family:var(--font-body);color:var(--text);outline:none"></div>
+              <div><label>Message</label><textarea placeholder="Write a message to all vendors…" style="width:100%;min-height:90px;border:1.5px solid var(--border);border-radius:12px;padding:10px 13px;font-size:13.5px;background:var(--surface-2);font-family:var(--font-body);color:var(--text);outline:none;resize:vertical"></textarea></div>
+              <button class="btn btn-primary full" onclick="toast('Demo: broadcasts are not sent from this preview.')">Send Broadcast (Demo)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== ANALYTICS ===== -->
+      <section class="page" id="page-analytics">
+        <div class="page-head"><div><h1>Analytics</h1><p>Platform-level performance · demo data</p></div></div>
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-h"><h3>Platform revenue (commission)</h3><span class="pill p-blue">₹62,500 MTD</span></div>
+            <svg class="chart-svg" viewBox="0 0 560 190" preserveAspectRatio="none">
+              <g stroke="var(--border)" stroke-width="1"><line x1="0" y1="38" x2="560" y2="38"/><line x1="0" y1="86" x2="560" y2="86"/><line x1="0" y1="134" x2="560" y2="134"/><line x1="0" y1="182" x2="560" y2="182"/></g>
+              <path d="M20 150 L90 142 L160 120 L230 126 L300 96 L370 104 L440 70 L510 58 L540 46 L540 186 L20 186 Z" fill="url(#ag)"/>
+              <path class="draw-line" d="M20 150 L90 142 L160 120 L230 126 L300 96 L370 104 L440 70 L510 58 L540 46" fill="none" stroke="var(--secondary)" stroke-width="3" stroke-linecap="round"/>
+              <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#0ea5e9" stop-opacity=".22"/><stop offset="1" stop-color="#0ea5e9" stop-opacity="0"/></linearGradient></defs>
+            </svg>
+          </div>
+          <div class="panel">
+            <div class="panel-h"><h3>Vendor signups per week</h3></div>
+            <svg class="chart-svg" viewBox="0 0 300 175" preserveAspectRatio="none">
+              <g stroke="var(--border)" stroke-width="1"><line x1="0" y1="40" x2="300" y2="40"/><line x1="0" y1="90" x2="300" y2="90"/><line x1="0" y1="140" x2="300" y2="140"/><line x1="0" y1="172" x2="300" y2="172"/></g>
+              <rect class="bar" x="14"  y="120" width="28" height="52"  rx="6" fill="var(--primary-soft)" style="transition-delay:.05s"/>
+              <rect class="bar" x="60"  y="98"  width="28" height="74"  rx="6" fill="var(--primary-soft)" style="transition-delay:.12s"/>
+              <rect class="bar" x="106" y="132" width="28" height="40"  rx="6" fill="var(--primary-soft)" style="transition-delay:.19s"/>
+              <rect class="bar" x="152" y="82"  width="28" height="90"  rx="6" fill="var(--primary-soft)" style="transition-delay:.26s"/>
+              <rect class="bar" x="198" y="110" width="28" height="62"  rx="6" fill="var(--primary-soft)" style="transition-delay:.33s"/>
+              <rect class="bar" x="244" y="60"  width="28" height="112" rx="6" fill="url(#abg)" style="transition-delay:.4s"/>
+              <defs><linearGradient id="abg" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#0ea5e9"/><stop offset="1" stop-color="#10b981"/></linearGradient></defs>
+            </svg>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-h"><h3>Top vendors by sales</h3><span class="pill p-amber">DEMO DATA</span></div>
+          <div style="display:flex;flex-direction:column;gap:13px">
+            <div style="display:flex;align-items:center;gap:14px"><span class="mini-av" style="background:linear-gradient(135deg,#4f46e5,#0ea5e9)">A</span><div style="flex:1"><b style="font-size:13.5px">ABC Mobile Store</b><div style="height:7px;border-radius:99px;background:var(--surface-2);margin-top:6px;overflow:hidden"><i style="display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--primary),var(--primary-2));border-radius:99px"></i></div></div><b style="font-family:var(--font-display)">₹1,25,500</b></div>
+            <div style="display:flex;align-items:center;gap:14px"><span class="mini-av" style="background:linear-gradient(135deg,#0ea5e9,#10b981)">X</span><div style="flex:1"><b style="font-size:13.5px">XYZ Electronics</b><div style="height:7px;border-radius:99px;background:var(--surface-2);margin-top:6px;overflow:hidden"><i style="display:block;height:100%;width:78%;background:linear-gradient(90deg,var(--secondary),#10b981);border-radius:99px"></i></div></div><b style="font-family:var(--font-display)">₹98,400</b></div>
+            <div style="display:flex;align-items:center;gap:14px"><span class="mini-av" style="background:linear-gradient(135deg,#7c3aed,#e11d48)">F</span><div style="flex:1"><b style="font-size:13.5px">Fashion Hub</b><div style="height:7px;border-radius:99px;background:var(--surface-2);margin-top:6px;overflow:hidden"><i style="display:block;height:100%;width:68%;background:linear-gradient(90deg,var(--primary-2),var(--danger));border-radius:99px"></i></div></div><b style="font-family:var(--font-display)">₹86,200</b></div>
+            <div style="display:flex;align-items:center;gap:14px"><span class="mini-av" style="background:linear-gradient(135deg,#f59e0b,#e11d48)">S</span><div style="flex:1"><b style="font-size:13.5px">Smart Accessories</b><div style="height:7px;border-radius:99px;background:var(--surface-2);margin-top:6px;overflow:hidden"><i style="display:block;height:100%;width:43%;background:linear-gradient(90deg,var(--accent),var(--danger));border-radius:99px"></i></div></div><b style="font-family:var(--font-display)">₹54,300</b></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== REPORTS ===== -->
+      <section class="page" id="page-reports">
+        <div class="page-head"><div><h1>Reports</h1><p>Generated exports for platform operations</p></div></div>
+        <div class="rep-grid">
+          <div class="rep"><span class="ric" style="background:var(--primary-soft);color:var(--primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 15h6M9 11h2"/></svg></span><div><b>Monthly Sales Report</b><small>January 2026 · all vendors</small></div><button class="btn btn-ghost btn-sm" onclick="toast('Demo: report generation is not wired up.')">Download</button></div>
+          <div class="rep"><span class="ric" style="background:rgba(22,163,74,.12);color:var(--success)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9.5 9.5 15M9 9.5l5.5 5.5"/></svg></span><div><b>Commission Report</b><small>Q1 2026 · platform earnings (5%)</small></div><button class="btn btn-ghost btn-sm" onclick="toast('Demo: report generation is not wired up.')">Download</button></div>
+          <div class="rep"><span class="ric" style="background:rgba(14,165,233,.12);color:var(--secondary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg></span><div><b>Vendor Performance</b><small>Last 90 days · orders, sales, ratings</small></div><button class="btn btn-ghost btn-sm" onclick="toast('Demo: report generation is not wired up.')">Download</button></div>
+          <div class="rep"><span class="ric" style="background:rgba(245,158,11,.14);color:#b45309"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M6 15h4"/></svg></span><div><b>Withdrawal Ledger</b><small>Full payout history · all vendors</small></div><button class="btn btn-ghost btn-sm" onclick="toast('Demo: report generation is not wired up.')">Download</button></div>
+        </div>
+      </section>
+
+      <!-- ===== AUDIT LOGS ===== -->
+      <section class="page" id="page-audit">
+        <div class="page-head"><div><h1>Audit Logs</h1><p>Every admin action is recorded · demo entries</p></div><span class="pill p-amber">DEMO ENTRIES</span></div>
+        <div class="twrap">
+          <table class="tbl">
+            <thead><tr><th>Timestamp</th><th>Actor</th><th>Action</th><th>Target</th><th>Type</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">26 Feb 10:42:18</td><td>Platform Admin</td><td>Reviewed withdrawal queue</td><td class="mono">WD-2081, WD-2080, WD-2079</td><td><span class="pill p-blue">View</span></td></tr>
+              <tr><td class="mono">25 Feb 17:05:44</td><td>System</td><td>Deposit verified — activation started</td><td class="mono">Gadget Garage · ₹1,000</td><td><span class="pill p-green">Finance</span></td></tr>
+              <tr><td class="mono">24 Feb 16:05:02</td><td>Platform Admin</td><td>Provisioned subdomain + SSL</td><td class="mono">urban.growbusinessonline.com</td><td><span class="pill p-violet">Infra</span></td></tr>
+              <tr><td class="mono">24 Feb 11:30:51</td><td>Platform Admin</td><td>Approved vendor onboarding</td><td class="mono">Urban Threads</td><td><span class="pill p-blue">Vendor</span></td></tr>
+              <tr><td class="mono">23 Feb 09:18:33</td><td>System</td><td>Payout batch completed</td><td class="mono">P-2026-018 · ₹62,500</td><td><span class="pill p-green">Finance</span></td></tr>
+              <tr><td class="mono">22 Feb 15:44:09</td><td>Platform Admin</td><td>Updated platform commission rate</td><td class="mono">5% → 5% (no change, saved)</td><td><span class="pill p-amber">Settings</span></td></tr>
+              <tr><td class="mono">21 Feb 12:20:47</td><td>Platform Admin</td><td>Suspended vendor (policy review)</td><td class="mono">FitLife Gear</td><td><span class="pill p-red">Vendor</span></td></tr>
+              <tr><td class="mono">20 Feb 08:02:12</td><td>System</td><td>Subdomain certificate renewed</td><td class="mono">abc.growbusinessonline.com</td><td><span class="pill p-violet">Infra</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== SETTINGS ===== -->
+      <section class="page" id="page-settings">
+        <div class="page-head"><div><h1>Settings</h1><p>Platform-wide configuration</p></div></div>
+        <div class="panel" style="max-width:720px">
+          <div class="fg-row">
+            <div class="fg"><label>Platform name</label><input type="text" value="GrowBusiness Online"></div>
+            <div class="fg"><label>Primary domain</label><input type="text" value="growbusinessonline.com" readonly style="color:var(--muted)"></div>
+            <div class="fg"><label>Commission rate (%)</label><input type="number" value="5"></div>
+            <div class="fg"><label>Security deposit (₹)</label><input type="number" value="1000"></div>
+          </div>
+          <div class="fg-row2"><div><b>Maintenance mode</b><small>Temporarily take all vendor stores offline</small></div><label class="switch"><input type="checkbox" onchange="toast(this.checked?'Demo: maintenance mode toggled ON (not real)':'Demo: maintenance mode toggled OFF','info')"><span class="sl"></span></label></div>
+          <div class="fg-row2" style="margin-top:12px"><div><b>New vendor approvals</b><small>Require manual review before activation</small></div><label class="switch"><input type="checkbox" checked onchange="toast('Demo: setting changed locally only','info')"><span class="sl"></span></label></div>
+          <div style="display:flex;gap:10px;margin-top:22px">
+            <button class="btn btn-primary" onclick="toast('Platform settings saved (demo only — nothing was stored)','ok')">Save Settings</button>
+            <button class="btn btn-ghost" onclick="toast('Demo: reset is not wired up.')">Reset</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- demo navigator -->
+<nav class="demo-nav" aria-label="Demo files">
+  <span class="dn-l">DEMOS</span>
+  <a href="MainWebsite-Demo.html"><i></i>Main Website</a>
+  <a href="VendorStore-Demo.html"><i></i>Vendor Store</a>
+  <a href="VendorAdmin-Demo.html"><i></i>Vendor Admin</a>
+  <a href="Customer-Demo.html"><i></i>Customer App</a>
+  <a href="PlatformAdmin-Demo.html" class="act"><i></i>Platform Admin</a>
+</nav>
+
+<div id="toasts"></div>
+
+<script>
+/* ===== Platform Admin Demo v2 (demo JS only, static data) ===== */
+const $=id=>document.getElementById(id);
+
+function toast(msg,type='info'){
+  const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;
+  $('toasts').appendChild(t);
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),450)},3400);
+}
+
+/* ---- DEMO DATA: vendors ---- */
+const VENDORS=[
+ {a:'Arjun Sharma',i:'AS',g:'linear-gradient(135deg,#4f46e5,#0ea5e9)',b:'ABC Mobile Store',sub:'abc',dep:'Verified',st:'Active',orders:156,sales:'₹1,25,500'},
+ {a:'Riya Mehta',i:'RM',g:'linear-gradient(135deg,#0ea5e9,#10b981)',b:'XYZ Electronics',sub:'xyz',dep:'Verified',st:'Active',orders:132,sales:'₹98,400'},
+ {a:'Farhan Ali',i:'FA',g:'linear-gradient(135deg,#7c3aed,#e11d48)',b:'Fashion Hub',sub:'fashion',dep:'Verified',st:'Active',orders:204,sales:'₹86,200'},
+ {a:'Neha Joshi',i:'NJ',g:'linear-gradient(135deg,#f59e0b,#e11d48)',b:'Smart Accessories',sub:'smart',dep:'Verified',st:'Active',orders:98,sales:'₹54,300'},
+ {a:'Vikram Rao',i:'VR',g:'linear-gradient(135deg,#10b981,#0d9488)',b:'Gadget Garage',sub:'gadget',dep:'Verified',st:'Active',orders:76,sales:'₹41,800'},
+ {a:'Ishaan Gupta',i:'IG',g:'linear-gradient(135deg,#334155,#0d1226)',b:'Urban Threads',sub:'urban',dep:'Verified',st:'Pending',orders:0,sales:'₹0'},
+ {a:'Priyanka Das',i:'PD',g:'linear-gradient(135deg,#e11d48,#7c3aed)',b:'Beauty Bloom',sub:'beauty',dep:'Unverified',st:'Pending',orders:0,sales:'₹0'},
+ {a:'Rohit Malhotra',i:'RM',g:'linear-gradient(135deg,#0ea5e9,#4f46e5)',b:'BookNook',sub:'booknook',dep:'Unverified',st:'Pending',orders:0,sales:'₹0'},
+ {a:'Ananya Reddy',i:'AR',g:'linear-gradient(135deg,#f97316,#e11d48)',b:'FitLife Gear',sub:'fitlife',dep:'Verified',st:'Suspended',orders:44,sales:'₹22,100'}
+];
+const stPill=s=>({Active:'p-green',Pending:'p-amber',Suspended:'p-red'}[s]);
+const depPill=d=>d==='Verified'?'p-green':'p-red';
+
+let vFilter='all', vSearch='';
+function renderVendors(){
+  const list=VENDORS.filter(v=>(vFilter==='all'||v.st===vFilter)&&(!vSearch||(v.b.toLowerCase().includes(vSearch)||v.a.toLowerCase().includes(vSearch)||v.sub.includes(vSearch))));
+  const row=v=>`<tr>
+    <td class="nm2"><span class="mini-av" style="background:${v.g}">${v.i}</span>${v.a}</td>
+    <td><b>${v.b}</b></td>
+    <td class="mono" style="color:var(--primary)">${v.sub}.growbusinessonline.com</td>
+    <td><span class="pill ${depPill(v.dep)}">${v.dep==='Verified'?'₹1,000 · Verified':'₹1,000 · Unverified'}</span></td>
+    <td class="stcell"><span class="pill ${stPill(v.st)}">${v.st}</span></td>
+    <td>${v.orders}</td>
+    <td>${v.sales}</td>
+    <td>${v.st==='Pending'
+      ?`<button class="btn btn-ok btn-sm" onclick="approveV('${v.b}')">Approve</button> <button class="btn btn-no btn-sm" onclick="toast('Demo: rejecting vendors is not wired up.')">Reject</button>`
+      :`<button class="btn btn-ghost btn-sm" onclick="toast('Demo: vendor management is not wired up.')">Manage</button>`}</td>
+  </tr>`;
+  $('vendorBody').innerHTML=list.length?list.map(row).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">No vendors match your search.</td></tr>';
+  $('dashVendorTable').querySelector('tbody').innerHTML=list.slice(0,6).map(row).join('');
+}
+function vf(btn,st){
+  vFilter=st;
+  document.querySelectorAll('[data-vf]').forEach(c=>c.classList.toggle('act',c===btn));
+  renderVendors();
+}
+function approveV(name){toast('Demo: '+name+' approved locally in this preview only (no real action)','ok')}
+function globalSearch(q){vSearch=(q||'').toLowerCase().trim();renderVendors()}
+
+/* ---- page switch ---- */
+const TITLES={dashboard:['Dashboard','Platform overview · all figures are demo data'],vendors:['Vendors','Manage, approve and review vendor accounts'],customers:['Customers','Platform-wide customer records (demo)'],deposits:['Security Deposits','₹1,000 refundable deposits · demo records'],payments:['Payments','Order payments & settlement (demo)'],orders:['Orders','Platform-wide order flow (demo)'],commissions:['Commissions','5% platform commission records (demo)'],withdrawals:['Withdrawals','Vendor payout requests to review (demo)'],payouts:['Payouts','Scheduled payout batches (demo)'],stores:['Stores','Vendor storefronts'],subdomains:['Subdomains','*.growbusinessonline.com domains (demo)'],firebase:['Firebase Apps','App configuration records (visual demo)'],notifications:['Notifications','System events & broadcasts'],analytics:['Analytics','Platform performance (demo)'],reports:['Reports','Operational exports'],audit:['Audit Logs','Admin action history (demo entries)'],settings:['Settings','Platform configuration']};
+function go(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('act'));
+  const el=$('page-'+p); if(el)el.classList.add('act');
+  document.querySelectorAll('.nav-it[data-page]').forEach(b=>b.classList.toggle('act',b.dataset.page===p));
+  const t=TITLES[p]||['',''];
+  $('pageTitle').innerHTML=`${t[0]}<small>${t[1]||''}</small>`;
+  closeSide(); window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.nav-it[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));
+
+/* ---- mobile sidebar ---- */
+function openSide(){$('side').classList.add('open');$('sideVeil').classList.add('open')}
+function closeSide(){$('side').classList.remove('open');$('sideVeil').classList.remove('open')}
+
+/* ---- dropdown ---- */
+function toggleDrop(id){const d=$(id);const was=d.classList.contains('open');document.querySelectorAll('.drop-menu').forEach(x=>x.classList.remove('open'));if(!was)d.classList.add('open')}
+document.addEventListener('click',e=>{if(!e.target.closest('.drop'))document.querySelectorAll('.drop-menu').forEach(x=>x.classList.remove('open'))});
+
+/* ---- theme ---- */
+function toggleTheme(){
+  const h=document.documentElement;
+  h.dataset.theme=h.dataset.theme==='dark'?'':'dark';
+  const dark=h.dataset.theme==='dark';
+  document.querySelector('.ic-moon').style.display=dark?'none':'block';
+  document.querySelector('.ic-sun').style.display=dark?'block':'none';
+  toast(dark?'Dark mode (demo)':'Light mode (demo)');
+}
+
+/* ---- counters ---- */
+let counted=false;
+function runCounters(){
+  if(counted)return; counted=true;
+  document.querySelectorAll('#page-dashboard .kpi b[data-count]').forEach(el=>{
+    const target=+el.dataset.count, pre=el.dataset.prefix||'', t0=performance.now(), dur=1200;
+    (function f(t){const p=Math.min((t-t0)/dur,1),e=1-Math.pow(1-p,3);
+      el.textContent=pre+Math.round(target*e).toLocaleString('en-IN');
+      if(p<1)requestAnimationFrame(f);})(t0);
+  });
+}
+runCounters();
+
+/* ---- 2-day activation countdowns (demo) ---- */
+const cds=[
+ {el:document.querySelector('.cd[data-cd="96000"]'), ms:96000*1000},
+ {el:document.querySelector('.cd[data-cd="54000"]'), ms:54000*1000}
+].filter(x=>x.el);
+cds.forEach(c=>c.until=Date.now()+c.ms);
+function tickCD(){
+  cds.forEach(c=>{
+    let d=c.until-Date.now();
+    if(d<0)d=0;
+    const dd=Math.floor(d/86400000);
+    const hh=String(Math.floor(d%86400000/3600000)).padStart(2,'0');
+    const mm=String(Math.floor(d%3600000/60000)).padStart(2,'0');
+    const ss=String(Math.floor(d%60000/1000)).padStart(2,'0');
+    c.el.textContent=`Activates in ${dd}d ${hh}:${mm}:${ss}`;
+  });
+}
+tickCD(); setInterval(tickCD,1000);
+
+/* ---- withdrawal approve/reject (demo) ---- */
+function wdAct(btn,action){
+  const tr=btn.closest('tr');
+  const st=tr.querySelector('.st'), act=tr.querySelector('.act');
+  if(action==='Approve'){
+    st.innerHTML='<span class="pill p-blue">Processing</span>';
+    toast('Demo: withdrawal for '+tr.dataset.vend+' marked Processing — no real money moves.','ok');
+  }else{
+    st.innerHTML='<span class="pill p-red">Rejected</span>';
+    toast('Demo: withdrawal for '+tr.dataset.vend+' rejected (preview only).','info');
+  }
+  act.innerHTML='<span style="font-size:12px;color:var(--muted)">Action logged (demo)</span>';
+}
+
+/* ---- init ---- */
+renderVendors();
+</script>
+</body>
+</html>
